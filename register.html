@@ -71,7 +71,10 @@
                 <label>সম্পূর্ণ ঠিকানা *</label>
                 <textarea class="form-control" id="address" rows="2" required placeholder="বাসা, রাস্তা, এলাকা, জেলা"></textarea>
             </div>
-            <div id="errorMsg" style="color:var(--danger);font-size:0.9rem;margin-bottom:1rem;display:none;"></div>
+            <div id="errorMsg"
+                style="color:var(--danger);font-size:0.9rem;margin-bottom:1rem;display:none;"
+                aria-live="polite">
+            </div>
             <button type="submit" class="btn btn-primary w-full btn-lg" id="regBtn">অ্যাকাউন্ট তৈরি করুন</button>
         </form>
 
