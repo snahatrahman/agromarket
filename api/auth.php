@@ -75,8 +75,8 @@ function handleLogout() {
 function handleMe() {
     $user = getCurrentUser();
     if (!$user) sendError('লগইন করুন', 401);
-    
-    // Refresh session from DB
+
+    // Refresh user data from database to keep session information up to date
     $pdo = getDB();
     $stmt = $pdo->prepare("SELECT id, name, email, role, phone, address FROM users WHERE id = ?");
     $stmt->execute([$user['id']]);

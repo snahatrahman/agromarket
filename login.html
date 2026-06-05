@@ -40,7 +40,10 @@
                 <label for="password">পাসওয়ার্ড</label>
                 <input type="password" class="form-control" id="password" placeholder="••••••••" required autocomplete="current-password">
             </div>
-            <div id="errorMsg" style="color:var(--danger);font-size:0.9rem;margin-bottom:1rem;display:none;"></div>
+            <div id="errorMsg"
+               style="color:var(--danger);font-size:0.9rem;margin-bottom:1rem;display:none;"
+               aria-live="polite">
+            </div>
             <button type="submit" class="btn btn-primary w-full btn-lg" id="loginBtn">লগইন করুন</button>
         </form>
 
