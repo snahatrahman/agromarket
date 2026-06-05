@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>অ্যাডমিন ড্যাশবোর্ড - AgroMarket</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">🌾 AgroMarket</a>
+      <nav id="auth-links"></nav>
+    </div>
+  </nav>
+
+  <section class="section section-gray">
+    <div class="container">
+      <h1 class="section-title">অ্যাডমিন ড্যাশবোর্ড</h1>
+
+      <div class="grid grid-4 mb-4">
+        <div class="stat-card">
+          <div class="number" id="totalUsers">0</div>
+          <div class="label">মোট ব্যবহারকারী</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="totalProducts">0</div>
+          <div class="label">মোট পণ্য</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="totalOrders">0</div>
+          <div class="label">মোট অর্ডার</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="totalRevenue">৳0</div>
+          <div class="label">মোট আয়</div>
+        </div>
+      </div>
+
+      <div class="grid grid-4 mb-4">
+        <div class="stat-card">
+          <div class="number" id="farmerCount">0</div>
+          <div class="label">কৃষক</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="consumerCount">0</div>
+          <div class="label">ক্রেতা</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="pendingOrders">0</div>
+          <div class="label">অপেক্ষমাণ অর্ডার</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="activeProducts">0</div>
+          <div class="label">সক্রিয় পণ্য</div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="flex-between mb-3">
+          <h2 class="text-xl font-bold">সকল অর্ডার পরিচালনা</h2>
+          <div class="flex gap-2">
+            <select id="statusFilter" class="form-control" style="width: auto;" onchange="loadOrders()">
+              <option value="">সব অর্ডার</option>
+              <option value="pending">অপেক্ষমাণ</option>
+              <option value="processing">প্রক্রিয়াধীন</option>
+              <option value="shipped">পাঠানো হয়েছে</option>
+              <option value="delivered">ডেলিভারি সম্পন্ন</option>
+              <option value="cancelled">বাতিল</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>অর্ডার নং</th>
+                <th>ক্রেতা</th>
+                <th>পণ্য সংখ্যা</th>
+                <th>মোট দাম</th>
+                <th>তারিখ</th>
+                <th>অবস্থা</th>
+                <th>অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTable">
+              <!-- Orders will be loaded here -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="noOrders" class="text-center py-5 hidden">
+          <p class="text-gray">কোন অর্ডার নেই</p>
+        </div>
+      </div>
+
+      <div class="grid grid-2 gap-3">
+        <div class="card">
+          <h2 class="text-xl font-bold mb-3">সাম্প্রতিক ব্যবহারকারী</h2>
+          <div id="recentUsers">
+            <!-- Recent users will be loaded here -->
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="text-xl font-bold mb-3">সাম্প্রতিক পণ্য</h2>
+          <div id="recentProducts">
+            <!-- Recent products will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 AgroMarket. সর্বস্বত্ব সংরক্ষিত।</p>
+  </footer>
+
+<script src="app.js"></script>
+    <script>
+        async function loadDashboard() {
+            const user = checkAuth('admin');
+            if (!user) return;
+
+            const stats = await getAdminStats();
+            if (stats) {
+                document.getElementById('totalUsers').textContent = stats.total_users;
+                document.getElementById('totalProducts').textContent = stats.total_products;
+                document.getElementById('totalOrders').textContent = stats.total_orders;
+                document.getElementById('totalRevenue').textContent = formatPrice(stats.total_revenue);
+                document.getElementById('farmerCount').textContent = stats.farmer_count;
+                document.getElementById('consumerCount').textContent = stats.consumer_count;
+                document.getElementById('pendingOrders').textContent = stats.pending_orders;
+            }
+
+            loadOrders();
+            loadRecentUsers();
+        }
+
+        async function loadOrders() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const orders = await getAllOrders(statusFilter);
+
+            const table = document.getElementById('ordersTable');
+            const noOrders = document.getElementById('noOrders');
+
+            if (!orders.length) {
+                document.querySelector('#ordersTable').closest('table').classList.add('hidden');
+                noOrders.classList.remove('hidden');
+                return;
+            }
+            document.querySelector('#ordersTable').closest('table').classList.remove('hidden');
+            noOrders.classList.add('hidden');
+
+            table.innerHTML = orders.map(order => {
+                const status = getStatusBadge(order.status);
+                return `
+                    <tr>
+                        <td class="font-bold">#${order.id}</td>
+                        <td>
+                            <div class="font-bold">${order.user_name}</div>
+                            <div class="text-sm text-gray">${order.phone}</div>
+                        </td>
+                        <td>${order.items.length}টি</td>
+                        <td class="font-bold text-primary">৳${order.total}</td>
+                        <td>
+                            <div>${formatDate(order.created_at)}</div>
+                            <div class="text-sm text-gray">${order.payment_method === 'cash' ? 'ক্যাশ' : order.payment_method}</div>
+                        </td>
+                        <td>
+                            <select class="form-control" style="font-size:0.875rem;padding:0.5rem;" onchange="handleStatusUpdate(${order.id}, this.value)">
+                                <option value="pending" ${order.status==='pending'?'selected':''}>অপেক্ষমাণ</option>
+                                <option value="processing" ${order.status==='processing'?'selected':''}>প্রক্রিয়াধীন</option>
+                                <option value="shipped" ${order.status==='shipped'?'selected':''}>পাঠানো হয়েছে</option>
+                                <option value="delivered" ${order.status==='delivered'?'selected':''}>ডেলিভারি সম্পন্ন</option>
+                                <option value="cancelled" ${order.status==='cancelled'?'selected':''}>বাতিল</option>
+                            </select>
+                        </td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="viewDetails(${order.id})" style="font-size:0.875rem;padding:0.5rem 1rem;">বিস্তারিত</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function handleStatusUpdate(orderId, status) {
+            const result = await updateOrderStatus(orderId, status);
+            if (result.success) {
+                loadDashboard();
+            } else {
+                alert(result.message);
+            }
+        }
+
+        async function loadRecentUsers() {
+            const users = await getAdminUsers();
+            const container = document.getElementById('recentUsers');
+            const recent = users.slice(0, 5);
+
+            if (!recent.length) {
+                container.innerHTML = '<p class="text-gray text-center py-4">কোন ব্যবহারকারী নেই</p>';
+                return;
+            }
+
+            container.innerHTML = recent.map(user => {
+                const roleBadge = user.role === 'farmer' ?
+                    '<span class="badge badge-success">কৃষক</span>' :
+                    user.role === 'admin' ?
+                    '<span class="badge badge-info">অ্যাডমিন</span>' :
+                    '<span class="badge badge-info">ক্রেতা</span>';
+                return `
+                    <div class="flex-between mb-3 pb-3" style="border-bottom:1px solid var(--border);">
+                        <div style="flex:1;">
+                            <div class="font-bold">${user.name}</div>
+                            <div class="text-sm text-gray">${user.email}</div>
+                        </div>
+                        <div>${roleBadge}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function viewDetails(orderId) {
+            const orders = await getAllOrders();
+            const order = orders.find(o => o.id == orderId);
+            if (!order) return;
+
+            const status = getStatusBadge(order.status);
+            alert(`অর্ডার #${order.id}\nক্রেতা: ${order.user_name}\nফোন: ${order.phone}\nঠিকানা: ${order.shipping_address}\nপেমেন্ট: ${order.payment_method}\nতারিখ: ${formatDate(order.created_at)}\nস্ট্যাটাস: ${status.text}\n\nপণ্য:\n${order.items.map(i => `- ${i.product_name}: ${i.quantity} × ৳${i.price} = ৳${i.total}`).join('\n')}\n\nমোট: ৳${order.total}`);
+        }
+
+        document.getElementById('statusFilter').addEventListener('change', loadOrders);
+
+        loadDashboard();
+    </script>
+</body>
+</html>

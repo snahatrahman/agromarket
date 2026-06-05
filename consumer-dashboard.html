@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ক্রেতা ড্যাশবোর্ড - AgroMarket</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">🌾 AgroMarket</a>
+      <nav id="auth-links"></nav>
+    </div>
+  </nav>
+
+<section class="section section-gray">
+    <div class="container">
+      <div class="flex-between mb-4">
+        <h1 class="section-title" style="margin:0;">স্বাগতম, <span id="userName"></span></h1>
+        <a href="products.html" class="btn btn-primary">🛒 কেনাকাটা করুন</a>
+      </div>
+
+      <div class="grid grid-4 mb-4">
+        <div class="stat-card">
+          <div class="number" id="totalOrders">0</div>
+          <div class="label">মোট অর্ডার</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="cartItems">0</div>
+          <div class="label">কার্টে পণ্য</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="totalSpent">৳0</div>
+          <div class="label">মোট ব্যয়</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="deliveredOrders">0</div>
+          <div class="label">ডেলিভারি সম্পন্ন</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex-between mb-3">
+          <h2 class="text-xl font-bold">সাম্প্রতিক অর্ডার</h2>
+          <a href="consumer-orders.html" class="btn btn-secondary">সব দেখুন</a>
+        </div>
+        <div id="recentOrders"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 AgroMarket. সর্বস্বত্ব সংরক্ষিত।</p>
+  </footer>
+
+<script src="app.js"></script>
+    <script>
+        async function loadDashboard() {
+            const user = checkAuth('consumer');
+            if (!user) return;
+
+            document.getElementById('userName').textContent = user.name;
+
+            const orders = await getMyOrders();
+            const cartData = await getCart();
+
+            document.getElementById('totalOrders').textContent = orders.length;
+            document.getElementById('cartItems').textContent = cartData.count || 0;
+
+            const totalSpent = orders.reduce((sum, o) => sum + parseFloat(o.total), 0);
+            document.getElementById('totalSpent').textContent = formatPrice(totalSpent);
+
+            const delivered = orders.filter(o => o.status === 'delivered').length;
+            document.getElementById('deliveredOrders').textContent = delivered;
+
+            displayRecentOrders(orders.slice(0, 5));
+        }
+
+        function displayRecentOrders(orders) {
+            const container = document.getElementById('recentOrders');
+            if (!orders.length) {
+                container.innerHTML = '<p class="text-gray text-center py-4">কোন অর্ডার নেই</p>';
+                return;
+            }
+            container.innerHTML = orders.map(order => {
+                const status = getStatusBadge(order.status);
+                return `
+                    <div class="flex-between mb-3 pb-3" style="border-bottom:1px solid var(--border);">
+                        <div style="flex:1;">
+                            <div class="font-bold">অর্ডার #${order.id}</div>
+                            <div class="text-sm text-gray">${order.items.length}টি পণ্য</div>
+                            <div class="text-sm text-gray">${formatDate(order.created_at)}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="font-bold text-primary">৳${order.total}</div>
+                            <span class="badge ${status.class} text-sm">${status.text}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>

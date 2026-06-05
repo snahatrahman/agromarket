@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>নতুন পণ্য যোগ করুন — AgroMarket</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<nav class="navbar">
+    <div class="container">
+        <a href="index.html" class="logo">🌾 AgroMarket</a>
+        <nav id="auth-links"></nav>
+    </div>
+</nav>
+
+<section class="section section-gray">
+    <div class="container" style="max-width:760px">
+        <div class="flex-between mb-4">
+            <h1 style="font-size:1.75rem;font-weight:800">নতুন পণ্য যোগ করুন</h1>
+            <a href="farmer-products.html" class="btn btn-secondary">← ফিরে যান</a>
+        </div>
+
+        <div class="card">
+            <form id="addProductForm">
+
+                <div class="form-group">
+                    <label>📦 পণ্যের নাম *</label>
+                    <input type="text" id="productName" class="form-control" required placeholder="যেমন: টমেটো, আম, পালং শাক">
+                </div>
+
+                <div class="form-group">
+                    <label>🏷️ পণ্যের ধরন *</label>
+                    <div class="category-grid">
+                        <div class="category-option" onclick="selectCategory('সবজি', this)"><div class="icon">🥬</div><div class="label">সবজি</div></div>
+                        <div class="category-option" onclick="selectCategory('ফল', this)"><div class="icon">🍎</div><div class="label">ফল</div></div>
+                        <div class="category-option" onclick="selectCategory('শস্য', this)"><div class="icon">🌾</div><div class="label">শস্য</div></div>
+                        <div class="category-option" onclick="selectCategory('মসলা', this)"><div class="icon">🌶️</div><div class="label">মসলা</div></div>
+                    </div>
+                    <input type="hidden" id="category">
+                </div>
+
+                <div class="grid grid-2" style="gap:1rem">
+                    <div class="form-group" style="margin-bottom:0">
+                        <label>💰 দাম (টাকা) *</label>
+                        <input type="number" id="price" class="form-control" required min="1" placeholder="যেমন: 50">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label>📏 একক *</label>
+                        <select id="unit" class="form-control" required>
+                            <option value="">নির্বাচন করুন</option>
+                            <option value="কেজি">কেজি</option>
+                            <option value="মণ">মণ</option>
+                            <option value="পিস">পিস</option>
+                            <option value="ডজন">ডজন</option>
+                            <option value="লিটার">লিটার</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-2 mt-2" style="gap:1rem">
+                    <div class="form-group" style="margin-bottom:0">
+                        <label>📦 মজুদ পরিমাণ *</label>
+                        <input type="number" id="stock" class="form-control" required min="1" placeholder="যেমন: 100">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label>📍 আপনার এলাকা *</label>
+                        <input type="text" id="location" class="form-control" required placeholder="যেমন: যশোর, রাজশাহী">
+                    </div>
+                </div>
+
+                <div class="form-group mt-2">
+                    <label>📝 পণ্যের বিবরণ *</label>
+                    <textarea id="description" class="form-control" rows="3" required placeholder="পণ্য সম্পর্কে সংক্ষিপ্ত তথ্য লিখুন"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>🖼️ পণ্যের ছবি</label>
+                    <div class="image-upload-area" id="uploadArea" onclick="document.getElementById('imageFile').click()">
+                        <input type="file" id="imageFile" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleImageSelect(this)">
+                        <div id="uploadPlaceholder">
+                            <p style="font-size:2rem">📷</p>
+                            <p class="font-bold">ছবি আপলোড করতে এখানে ক্লিক করুন</p>
+                            <p class="text-sm text-gray mt-1">JPG, PNG, WEBP — সর্বোচ্চ ৩ MB</p>
+                        </div>
+                        <img id="imagePreview" class="image-preview hidden" alt="Preview">
+                    </div>
+                    <p class="text-sm text-gray mt-1">অথবা ছবির URL লিখুন:</p>
+                    <input type="url" id="imageUrl" class="form-control mt-1" placeholder="https://...">
+                </div>
+
+                <div id="errorMsg" style="color:var(--danger);padding:0.75rem;background:#fee2e2;border-radius:var(--radius);margin-bottom:1rem;display:none;"></div>
+
+                <div class="flex gap-2 mt-3">
+                    <button type="button" class="btn btn-secondary" style="flex:1" onclick="window.location.href='farmer-products.html'">বাতিল</button>
+                    <button type="submit" class="btn btn-primary" style="flex:2" id="submitBtn">✅ পণ্য যোগ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<footer><div class="container"><p>© 2024 AgroMarket. সর্বস্বত্ব সংরক্ষিত।</p></div></footer>
+
+<script src="app.js"></script>
+<script>
+if (!checkAuth('farmer')) window.location.href = 'login.html';
+
+let selectedCategory = '';
+let uploadedImageUrl = '';
+
+function selectCategory(cat, el) {
+    document.querySelectorAll('.category-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedCategory = cat;
+    document.getElementById('category').value = cat;
+}
+
+function handleImageSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) { showToast('ছবি ৩MB এর বেশি হওয়া যাবে না', 'error'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+        const preview = document.getElementById('imagePreview');
+        preview.src = e.target.result;
+        preview.classList.remove('hidden');
+        document.getElementById('uploadPlaceholder').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+}
+
+document.getElementById('addProductForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const errDiv = document.getElementById('errorMsg');
+    errDiv.style.display = 'none';
+
+    if (!selectedCategory) { errDiv.textContent = 'পণ্যের ধরন নির্বাচন করুন'; errDiv.style.display = 'block'; return; }
+
+    const btn = document.getElementById('submitBtn');
+    btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block"></span> যোগ করা হচ্ছে...';
+    btn.disabled = true;
+
+    // Image handling
+    let imageUrl = document.getElementById('imageUrl').value.trim();
+    const fileInput = document.getElementById('imageFile');
+    if (fileInput.files[0]) {
+        showToast('ছবি আপলোড হচ্ছে...', 'warning');
+        const uploadResult = await uploadProductImage(fileInput.files[0]);
+        if (uploadResult.success) {
+            imageUrl = uploadResult.data.url;
+        } else {
+            showToast(uploadResult.message, 'error');
+        }
+    }
+
+    const productData = {
+        name:        document.getElementById('productName').value.trim(),
+        category:    selectedCategory,
+        price:       parseFloat(document.getElementById('price').value),
+        unit:        document.getElementById('unit').value,
+        stock:       parseInt(document.getElementById('stock').value),
+        location:    document.getElementById('location').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        image:       imageUrl || '',
+        harvest_date: new Date().toISOString()
+    };
+
+    const result = await addProduct(productData);
+
+    if (result.success) {
+        showToast('পণ্যটি সফলভাবে যোগ হয়েছে!', 'success');
+        setTimeout(() => window.location.href = 'farmer-products.html', 1000);
+    } else {
+        errDiv.textContent = result.message;
+        errDiv.style.display = 'block';
+        btn.textContent = '✅ পণ্য যোগ করুন';
+        btn.disabled = false;
+    }
+});
+</script>
+</body>
+</html>

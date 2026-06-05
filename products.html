@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>পণ্য তালিকা - AgroMarket</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">🌾 AgroMarket</a>
+      <nav id="auth-links">
+        <a href="products.html">পণ্য</a>
+        <a href="login.html">লগইন</a>
+        <a href="register.html">রেজিস্টার</a>
+      </nav>
+    </div>
+  </nav>
+
+  <section class="section section-gray">
+    <div class="container">
+      <h1 class="section-title">সকল পণ্য</h1>
+
+      <div class="card mb-4">
+        <div class="flex-between mb-3" style="flex-wrap: wrap; gap: 1rem;">
+          <div class="form-group" style="margin: 0; flex: 1; min-width: 250px;">
+            <input type="text" id="searchInput" class="form-control" placeholder="পণ্য খুঁজুন...">
+          </div>
+          <div class="flex gap-2" style="flex-wrap: wrap;">
+            <select id="categoryFilter" class="form-control" style="width: auto;">
+              <option value="">সব ক্যাটাগরি</option>
+              <option value="সবজি">সবজি</option>
+              <option value="ফল">ফল</option>
+              <option value="শস্য">শস্য</option>
+              <option value="মসলা">মসলা</option>
+            </select>
+            <select id="sortBy" class="form-control" style="width: auto;">
+              <option value="newest">নতুন আগে</option>
+              <option value="price-low">দাম: কম থেকে বেশি</option>
+              <option value="price-high">দাম: বেশি থেকে কম</option>
+              <option value="fresh">সবচেয়ে তাজা</option>
+            </select>
+          </div>
+        </div>
+        <div id="filterInfo" class="text-gray text-sm"></div>
+      </div>
+
+      <div id="productsGrid" class="grid grid-4">
+        <!-- Products will be loaded here -->
+      </div>
+
+      <div id="noResults" class="text-center py-5 hidden">
+        <h3 class="text-2xl text-gray">কোন পণ্য পাওয়া যায়নি</h3>
+        <p class="text-gray mt-2">ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 AgroMarket. সর্বস্বত্ব সংরক্ষিত।</p>
+  </footer>
+
+ <script src="app.js"></script>
+    <script>
+        async function loadProducts() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const category   = document.getElementById('categoryFilter').value;
+            const sort       = document.getElementById('sortBy').value;
+
+            const params = {};
+            if (searchTerm) params.search = searchTerm;
+            if (category)   params.category = category;
+            if (sort)       params.sort = sort;
+
+            const products = await getProducts(params);
+            displayProducts(products);
+        }
+
+        function displayProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            const noResults = document.getElementById('noResults');
+
+            if (!products.length) {
+                grid.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                return;
+            }
+            grid.classList.remove('hidden');
+            noResults.classList.add('hidden');
+
+            grid.innerHTML = products.map(product => {
+                const freshness = getFreshnessBadge(product.days_old);
+                const hasDiscount = product.discount > 0;
+                return `
+                    <div class="product-card" onclick="window.location.href='product-details.html?id=${product.id}'">
+                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'">
+                        <div class="product-card-body">
+                            <div class="flex-between mb-2">
+                                <h3 class="text-xl font-bold">${product.name}</h3>
+                                <span class="badge ${freshness.class}">${freshness.text}</span>
+                            </div>
+                            <p class="text-gray text-sm mb-2">${product.description}</p>
+                            <div class="flex-between mb-2">
+                                <span class="text-gray text-sm">🧑‍🌾 ${product.farmer_name}</span>
+                                <span class="text-gray text-sm">📍 ${product.location}</span>
+                            </div>
+                            <div class="flex-between" style="align-items:center;">
+                                <div>
+                                    ${hasDiscount ? `
+                                        <div>
+                                            <span class="text-gray text-sm" style="text-decoration:line-through">৳${product.base_price}</span>
+                                            <span class="badge badge-danger text-sm">${product.discount}% ছাড়</span>
+                                        </div>
+                                    ` : ''}
+                                    <div class="text-2xl font-bold text-primary">৳${product.current_price}/${product.unit}</div>
+                                </div>
+                                <button class="btn btn-primary" onclick="event.stopPropagation(); handleAddToCart(${product.id})">
+                                    কার্টে যোগ করুন
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('filterInfo').textContent = `${products.length}টি পণ্য পাওয়া গেছে`;
+        }
+
+        async function handleAddToCart(productId) {
+            const user = getCurrentUser();
+            if (!user) {
+                alert('কার্টে যোগ করতে লগইন করুন');
+                window.location.href = 'login.html';
+                return;
+            }
+            const result = await addToCart(productId, 1);
+            if (result.success) {
+                alert('পণ্যটি কার্টে যোগ হয়েছে!');
+                updateNavbar();
+            } else {
+                alert(result.message);
+            }
+        }
+
+        let debounceTimer;
+        document.getElementById('searchInput').addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(loadProducts, 400);
+        });
+        document.getElementById('categoryFilter').addEventListener('change', loadProducts);
+        document.getElementById('sortBy').addEventListener('change', loadProducts);
+
+        loadProducts();
+    </script>
+</body>
+</html>

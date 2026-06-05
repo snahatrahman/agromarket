@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>আমার পণ্য - AgroMarket</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">🌾 AgroMarket</a>
+      <nav id="auth-links"></nav>
+    </div>
+  </nav>
+
+<section class="section section-gray">
+    <div class="container">
+      <div class="flex-between mb-4">
+        <h1 class="section-title" style="margin:0;">আমার পণ্য</h1>
+        <a href="farmer-add-product.html" class="btn btn-primary">+ নতুন পণ্য যোগ করুন</a>
+      </div>
+      <div id="productsContainer"></div>
+    </div>
+  </section>
+  <footer>
+    <p>&copy; 2026 AgroMarket. সর্বস্বত্ব সংরক্ষিত।</p>
+  </footer>
+
+<script src="app.js"></script>
+    <script>
+        async function loadProducts() {
+            const user = checkAuth('farmer');
+            if (!user) return;
+
+            const products = await getFarmerProducts();
+            const container = document.getElementById('productsContainer');
+
+            if (!products.length) {
+                container.innerHTML = `
+                    <div class="card text-center py-5">
+                        <h3 class="text-2xl text-gray mb-3">কোন পণ্য নেই</h3>
+                        <a href="farmer-add-product.html" class="btn btn-primary">+ প্রথম পণ্য যোগ করুন</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="card" style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>পণ্য</th>
+                                <th>ক্যাটাগরি</th>
+                                <th>মূল দাম</th>
+                                <th>বর্তমান দাম</th>
+                                <th>স্টক</th>
+                                <th>অবস্থা</th>
+                                <th>অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${products.map(p => {
+                                const freshness = getFreshnessBadge(p.days_old);
+                                return `
+                                    <tr>
+                                        <td>
+                                            <div class="font-bold">${p.name}</div>
+                                            <div class="text-sm text-gray">${p.days_old} দিন আগে সংগ্রহ</div>
+                                        </td>
+                                        <td>${p.category}</td>
+                                        <td>৳${p.base_price}</td>
+                                        <td class="font-bold text-primary">
+                                            ৳${p.current_price}
+                                            ${p.discount > 0 ? `<span class="badge badge-danger text-sm">${p.discount}% ছাড়</span>` : ''}
+                                        </td>
+                                        <td>${p.stock} ${p.unit}</td>
+                                        <td><span class="badge ${freshness.class}">${freshness.text}</span></td>
+                                        <td>
+                                            <button class="btn btn-danger" onclick="handleDelete(${p.id})" style="font-size:0.875rem;padding:0.5rem 1rem;">মুছুন</button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        async function handleDelete(productId) {
+            if (!confirm('এই পণ্যটি মুছে ফেলতে চান?')) return;
+            const result = await deleteProduct(productId);
+            if (result.success) {
+                alert('পণ্য মুছে ফেলা হয়েছে');
+                loadProducts();
+            } else {
+                alert(result.message);
+            }
+        }
+
+        loadProducts();
+    </script>
+</body>
+</html>

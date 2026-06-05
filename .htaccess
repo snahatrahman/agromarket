@@ -1,0 +1,41 @@
+# ================================================================
+# .htaccess — AgroMarket
+# এই ফাইলটা agromarket/ ফোল্ডারের root এ রাখুন
+# (যেখানে index.html আছে সেখানে)
+# ================================================================
+
+Options -Indexes
+
+# PHP API files allow
+<FilesMatch "\.php$">
+    Allow from all
+</FilesMatch>
+
+# Uploads folder — PHP execution বন্ধ (security)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # uploads/ folder এ PHP চলবে না
+    RewriteRule ^uploads/.*\.php$ - [F,L]
+</IfModule>
+
+# ================================================================
+# Security Headers
+# ================================================================
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# ================================================================
+# Caching for static files (performance)
+# ================================================================
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css             "access plus 1 week"
+    ExpiresByType application/javascript "access plus 1 week"
+    ExpiresByType image/jpeg           "access plus 1 month"
+    ExpiresByType image/png            "access plus 1 month"
+    ExpiresByType image/webp           "access plus 1 month"
+</IfModule>

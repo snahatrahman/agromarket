@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>চেকআউট - AgroMarket</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">🌾 AgroMarket</a>
+      <nav id="auth-links"></nav>
+    </div>
+  </nav>
+
+  <section class="section section-gray">
+    <div class="container">
+      <h1 class="section-title">চেকআউট</h1>
+
+      <div class="grid grid-3" style="grid-template-columns: 2fr 1fr; gap: 2rem;">
+        <div class="card">
+          <h2 class="text-2xl font-bold mb-4">ডেলিভারি তথ্য</h2>
+          <form id="checkoutForm">
+            <div class="form-group">
+              <label>সম্পূর্ণ নাম *</label>
+              <input type="text" id="name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label>ফোন নম্বর *</label>
+              <input type="tel" id="phone" class="form-control" placeholder="01XXXXXXXXX" required>
+            </div>
+
+            <div class="form-group">
+              <label>সম্পূর্ণ ঠিকানা *</label>
+              <textarea id="address" class="form-control" rows="4" required placeholder="বাসা/ফ্ল্যাট নং, রাস্তা, এলাকা, জেলা"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>পেমেন্ট মাধ্যম *</label>
+              <select id="paymentMethod" class="form-control" required>
+                <option value="">নির্বাচন করুন</option>
+                <option value="cash">ক্যাশ অন ডেলিভারি</option>
+                <option value="bkash">বিকাশ</option>
+                <option value="nagad">নগদ</option>
+                <option value="rocket">রকেট</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>বিশেষ নির্দেশনা (ঐচ্ছিক)</label>
+              <textarea id="notes" class="form-control" rows="3" placeholder="যেকোনো বিশেষ নির্দেশনা লিখুন..."></textarea>
+            </div>
+
+            <div class="flex gap-2">
+              <button type="button" class="btn btn-secondary" onclick="window.location.href='cart.html'">← কার্টে ফিরে যান</button>
+              <button type="submit" class="btn btn-primary" style="flex: 1;">অর্ডার নিশ্চিত করুন</button>
+            </div>
+          </form>
+        </div>
+
+        <div>
+          <div class="card mb-3">
+            <h3 class="text-xl font-bold mb-3">অর্ডার সারাংশ</h3>
+            <div id="orderItems" class="mb-3">
+              <!-- Order items will be loaded here -->
+            </div>
+            <div class="flex-between mb-2 pb-2" style="border-top: 2px solid var(--border); padding-top: 1rem;">
+              <span class="text-lg font-bold">সর্বমোট:</span>
+              <span id="orderTotal" class="text-2xl font-bold text-primary">৳0</span>
+            </div>
+          </div>
+
+          <div class="card" style="background: var(--light-gray);">
+            <h4 class="font-bold mb-2">📦 ডেলিভারি তথ্য</h4>
+            <p class="text-sm text-gray">ডেলিভারি সময়: ২-৩ কর্মদিবস</p>
+            <p class="text-sm text-gray">ডেলিভারি চার্জ: বিনামূল্যে</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 AgroMarket. সর্বস্বত্ব সংরক্ষিত।</p>
+  </footer>
+
+<script src="app.js"></script>
+    <script>
+        async function loadCheckout() {
+            const user = getCurrentUser();
+            if (!user) { window.location.href = 'login.html'; return; }
+
+            const cartData = await getCart();
+            if (!cartData.items.length) {
+                alert('আপনার কার্ট খালি');
+                window.location.href = 'products.html';
+                return;
+            }
+
+            document.getElementById('name').value  = user.name || '';
+            document.getElementById('phone').value = user.phone || '';
+            document.getElementById('address').value = user.address || '';
+
+            displayOrderSummary(cartData.items, cartData.grand_total);
+        }
+
+        function displayOrderSummary(items, total) {
+            const container = document.getElementById('orderItems');
+            container.innerHTML = items.map(item => `
+                <div class="flex-between mb-2 pb-2" style="border-bottom:1px solid var(--border);">
+                    <div style="flex:1;">
+                        <div class="font-bold">${item.product_name}</div>
+                        <div class="text-sm text-gray">${item.quantity} ${item.unit} × ৳${item.current_price}</div>
+                    </div>
+                    <div class="font-bold">৳${item.item_total}</div>
+                </div>
+            `).join('');
+            document.getElementById('orderTotal').textContent = formatPrice(total);
+        }
+
+        document.getElementById('checkoutForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button[type=submit]');
+            btn.textContent = 'অপেক্ষা করুন...';
+            btn.disabled = true;
+
+            const orderData = {
+                shipping_address: document.getElementById('address').value,
+                phone:           document.getElementById('phone').value,
+                payment_method:  document.getElementById('paymentMethod').value,
+                notes:           document.getElementById('notes').value
+            };
+
+            const result = await createOrder(orderData);
+
+            if (result.success) {
+                alert(`আপনার অর্ডার সফলভাবে সম্পন্ন হয়েছে!\nঅর্ডার নম্বর: #${result.data.order_id}`);
+                updateNavbar();
+                window.location.href = 'consumer-orders.html';
+            } else {
+                alert(result.message);
+                btn.textContent = 'অর্ডার নিশ্চিত করুন';
+                btn.disabled = false;
+            }
+        });
+
+        loadCheckout();
+    </script>
+</body>
+</html>

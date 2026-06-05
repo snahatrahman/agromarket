@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroMarket — কৃষক থেকে ভোক্তা মার্কেটপ্লেস</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<nav class="navbar">
+    <div class="container">
+        <a href="index.html" class="logo">🌾 AgroMarket</a>
+        <nav id="auth-links"></nav>
+    </div>
+</nav>
+
+<div class="hero">
+    <div class="container">
+        <h1>খামার থেকে সরাসরি আপনার টেবিলে</h1>
+        <p>স্থানীয় কৃষকদের সাথে সরাসরি যোগাযোগ করুন। ফসল তোলার তারিখের উপর ভিত্তি করে তাজা পণ্য পান সাশ্রয়ী মূল্যে।</p>
+        <div class="btn-group">
+            <a href="products.html" class="btn btn-white btn-lg">🛒 পণ্য দেখুন</a>
+            <a href="register.html" class="btn btn-ghost btn-lg">👨‍🌾 কৃষক হিসেবে যোগ দিন</a>
+        </div>
+    </div>
+</div>
+
+<section class="section section-white">
+    <div class="container">
+        <h2 class="section-title">কেন AgroMarket বেছে নেবেন?</h2>
+        <div class="grid grid-3">
+            <div class="card text-center">
+                <div style="font-size:3rem;margin-bottom:1rem">🌿</div>
+                <h3 class="font-bold text-xl mb-2">১০০% তাজা পণ্য</h3>
+                <p class="text-gray">সরাসরি কৃষকদের কাছ থেকে, কোনো মধ্যস্থতাকারী ছাড়া</p>
+            </div>
+            <div class="card text-center">
+                <div style="font-size:3rem;margin-bottom:1rem">💰</div>
+                <h3 class="font-bold text-xl mb-2">স্বয়ংক্রিয় ছাড়</h3>
+                <p class="text-gray">পুরনো পণ্যে স্বয়ংক্রিয়ভাবে ২০-৩০% মূল্যছাড়</p>
+            </div>
+            <div class="card text-center">
+                <div style="font-size:3rem;margin-bottom:1rem">📅</div>
+                <h3 class="font-bold text-xl mb-2">সম্পূর্ণ স্বচ্ছতা</h3>
+                <p class="text-gray">প্রতিটি পণ্যের ফসল তোলার তারিখ স্পষ্টভাবে দেখুন</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section section-gray">
+    <div class="container">
+        <h2 class="section-title">সদ্য আসা পণ্য</h2>
+        <div id="products" class="grid grid-4">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+        </div>
+        <div class="text-center mt-4">
+            <a href="products.html" class="btn btn-primary btn-lg">সব পণ্য দেখুন →</a>
+        </div>
+    </div>
+</section>
+
+<section class="section section-white">
+    <div class="container">
+        <h2 class="section-title">কিভাবে কাজ করে?</h2>
+        <div class="grid grid-3">
+            <div class="card text-center">
+                <div style="background:var(--primary);color:white;width:3rem;height:3rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:800;margin:0 auto 1rem">১</div>
+                <h3 class="font-bold text-lg mb-2">রেজিস্টার করুন</h3>
+                <p class="text-gray text-sm">Consumer বা Farmer হিসেবে বিনামূল্যে অ্যাকাউন্ট তৈরি করুন</p>
+            </div>
+            <div class="card text-center">
+                <div style="background:var(--primary);color:white;width:3rem;height:3rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:800;margin:0 auto 1rem">২</div>
+                <h3 class="font-bold text-lg mb-2">পণ্য বেছে নিন</h3>
+                <p class="text-gray text-sm">তাজা পণ্য দেখুন, ফসল তোলার তারিখ যাচাই করুন</p>
+            </div>
+            <div class="card text-center">
+                <div style="background:var(--primary);color:white;width:3rem;height:3rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:800;margin:0 auto 1rem">৩</div>
+                <h3 class="font-bold text-lg mb-2">অর্ডার দিন</h3>
+                <p class="text-gray text-sm">ঘরে বসেই অর্ডার করুন, দ্রুত ডেলিভারি পান</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>© 2024 AgroMarket — কৃষক ও ভোক্তার মেলবন্ধন। সর্বস্বত্ব সংরক্ষিত।</p>
+    </div>
+</footer>
+
+<script src="app.js"></script>
+<script>
+async function loadHomepage() {
+    const products = await getProducts({ sort: 'newest' });
+    const container = document.getElementById('products');
+
+    const fresh = products.slice(0, 8);
+    if (!fresh.length) {
+        container.innerHTML = '<div class="text-center text-gray py-5" style="grid-column:1/-1"><p style="font-size:1.125rem">এখনো কোনো পণ্য যোগ হয়নি।</p><a href="register.html" class="btn btn-primary mt-3">কৃষক হিসেবে যোগ দিন</a></div>';
+        return;
+    }
+
+    container.innerHTML = fresh.map(p => {
+        const badge = getFreshnessBadge(p.days_old);
+        return `
+        <div class="product-card" onclick="window.location.href='product-details.html?id=${p.id}'">
+            <img src="${p.image}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'">
+            <div class="product-card-body">
+                <div class="flex-between mb-1">
+                    <h3 class="font-bold" style="font-size:1.0625rem">${p.name}</h3>
+                    <span class="badge ${badge.class}" style="font-size:0.75rem">${badge.text}</span>
+                </div>
+                <p class="text-sm text-gray mb-2">📍 ${p.location} • 🧑‍🌾 ${p.farmer_name}</p>
+                <div class="flex-between" style="margin-top:auto">
+                    <div>
+                        ${p.discount > 0 ? `<div class="text-sm text-gray" style="text-decoration:line-through">৳${p.base_price}</div>` : ''}
+                        <div class="font-bold text-primary" style="font-size:1.25rem">৳${p.current_price}<span class="text-sm text-gray font-bold">/${p.unit}</span></div>
+                    </div>
+                    ${p.discount > 0 ? `<span class="badge badge-danger">${p.discount}% ছাড়</span>` : ''}
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+loadHomepage();
+</script>
+</body>
+</html>

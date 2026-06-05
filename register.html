@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>রেজিস্টার — AgroMarket</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .auth-page { min-height: 100vh; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); display: flex; flex-direction: column; }
+        .auth-wrapper { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+        .auth-card { background: white; border-radius: 1.25rem; padding: 2.5rem; width: 100%; max-width: 520px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
+        .role-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .role-option { padding: 1.25rem; border: 2px solid var(--border); border-radius: var(--radius); cursor: pointer; text-align: center; transition: all 0.2s; }
+        .role-option:hover { border-color: var(--primary); background: #f0fdf4; }
+        .role-option.selected { border-color: var(--primary); background: #f0fdf4; }
+        .role-option .role-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .role-option .role-title { font-weight: 700; font-size: 1rem; }
+        .role-option .role-desc { font-size: 0.8125rem; color: var(--gray); margin-top: 0.25rem; }
+    </style>
+</head>
+<body class="auth-page">
+<nav class="navbar">
+    <div class="container">
+        <a href="index.html" class="logo">🌾 AgroMarket</a>
+        <nav id="auth-links"></nav>
+    </div>
+</nav>
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h2 class="text-2xl font-bold mb-1 text-center">নতুন অ্যাকাউন্ট তৈরি করুন</h2>
+        <p class="text-center text-gray mb-4" style="font-size:0.9375rem">AgroMarket-এ স্বাগতম!</p>
+
+        <div class="form-group">
+            <label>আপনি কি হিসেবে যোগ দিতে চান?</label>
+            <div class="role-picker">
+                <div class="role-option selected" id="role-consumer" onclick="selectRole('consumer')">
+                    <div class="role-icon">🛒</div>
+                    <div class="role-title">ক্রেতা</div>
+                    <div class="role-desc">পণ্য কিনবেন</div>
+                </div>
+                <div class="role-option" id="role-farmer" onclick="selectRole('farmer')">
+                    <div class="role-icon">👨‍🌾</div>
+                    <div class="role-title">কৃষক / বিক্রেতা</div>
+                    <div class="role-desc">পণ্য বিক্রি করবেন</div>
+                </div>
+            </div>
+        </div>
+
+        <form id="registerForm" onsubmit="handleRegister(event)">
+            <input type="hidden" id="role" value="consumer">
+            <div class="grid grid-2" style="gap:1rem">
+                <div class="form-group" style="margin-bottom:0">
+                    <label>সম্পূর্ণ নাম *</label>
+                    <input type="text" class="form-control" id="name" required placeholder="আপনার নাম">
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                    <label>মোবাইল নম্বর *</label>
+                    <input type="tel" class="form-control" id="phone" required placeholder="01XXXXXXXXX">
+                </div>
+            </div>
+            <div class="form-group mt-2">
+                <label>ইমেইল ঠিকানা *</label>
+                <input type="email" class="form-control" id="email" required placeholder="example@email.com">
+            </div>
+            <div class="form-group">
+                <label>পাসওয়ার্ড * (কমপক্ষে ৬ অক্ষর)</label>
+                <input type="password" class="form-control" id="password" required minlength="6" placeholder="••••••">
+            </div>
+            <div class="form-group">
+                <label>সম্পূর্ণ ঠিকানা *</label>
+                <textarea class="form-control" id="address" rows="2" required placeholder="বাসা, রাস্তা, এলাকা, জেলা"></textarea>
+            </div>
+            <div id="errorMsg" style="color:var(--danger);font-size:0.9rem;margin-bottom:1rem;display:none;"></div>
+            <button type="submit" class="btn btn-primary w-full btn-lg" id="regBtn">অ্যাকাউন্ট তৈরি করুন</button>
+        </form>
+
+        <p class="text-center mt-3" style="color:var(--gray)">
+            ইতিমধ্যে অ্যাকাউন্ট আছে? <a href="login.html" style="color:var(--primary);font-weight:600">লগইন করুন</a>
+        </p>
+    </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+    function selectRole(role) {
+        document.getElementById('role').value = role;
+        document.getElementById('role-consumer').classList.toggle('selected', role === 'consumer');
+        document.getElementById('role-farmer').classList.toggle('selected', role === 'farmer');
+    }
+
+    async function handleRegister(e) {
+        e.preventDefault();
+        const btn = document.getElementById('regBtn');
+        const errDiv = document.getElementById('errorMsg');
+        btn.innerHTML = '<span class="spinner" style="width:18px;height:18px;border-width:2px;display:inline-block"></span> অপেক্ষা করুন...';
+        btn.disabled = true;
+        errDiv.style.display = 'none';
+
+        const userData = {
+            name:     document.getElementById('name').value.trim(),
+            email:    document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value,
+            phone:    document.getElementById('phone').value.trim(),
+            address:  document.getElementById('address').value.trim(),
+            role:     document.getElementById('role').value
+        };
+
+        const result = await register(userData);
+
+        if (result.success) {
+            showToast('রেজিস্ট্রেশন সফল! স্বাগতম!', 'success');
+            const r = { farmer: 'farmer-dashboard.html', consumer: 'consumer-dashboard.html' };
+            setTimeout(() => window.location.href = r[result.data.user.role] || 'index.html', 800);
+        } else {
+            errDiv.textContent = result.message;
+            errDiv.style.display = 'block';
+            btn.textContent = 'অ্যাকাউন্ট তৈরি করুন';
+            btn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

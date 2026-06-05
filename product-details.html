@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>পণ্যের বিস্তারিত - AgroMarket</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">🌾 AgroMarket</a>
+      <nav id="auth-links"></nav>
+    </div>
+  </nav>
+
+  <section class="section">
+    <div class="container">
+      <a href="products.html" class="btn btn-secondary mb-4" style="display: inline-flex;">← পণ্য তালিকায় ফিরে যান</a>
+      
+      <div id="productDetails">
+        <!-- Product details will be loaded here -->
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 AgroMarket. সর্বস্বত্ব সংরক্ষিত।</p>
+  </footer>
+
+ <script src="app.js"></script>
+    <script>
+        async function loadProductDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = parseInt(urlParams.get('id'));
+
+            if (!productId) { window.location.href = 'products.html'; return; }
+
+            const data = await getProductDetail(productId);
+
+            if (!data) {
+                alert('পণ্য পাওয়া যায়নি');
+                window.location.href = 'products.html';
+                return;
+            }
+
+            displayProduct(data.product, data.reviews, data.avg_rating);
+        }
+
+        function displayProduct(product, reviews, avgRating) {
+            const freshness = getFreshnessBadge(product.days_old);
+            const hasDiscount = product.discount > 0;
+            const container = document.getElementById('productDetails');
+
+            const starsHTML = Array.from({length: 5}, (_, i) =>
+                `<span style="color:${i < Math.round(avgRating) ? '#f59e0b' : '#d1d5db'}">★</span>`
+            ).join('');
+
+            container.innerHTML = `
+                <div class="grid grid-2" style="gap:3rem;">
+                    <div>
+                        <img src="${product.image}" alt="${product.name}" style="width:100%;border-radius:1rem;box-shadow:var(--shadow-lg);" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=400'">
+                        
+                        ${reviews.length > 0 ? `
+                        <div class="card mt-4">
+                            <h3 class="font-bold text-xl mb-3">রিভিউ (${starsHTML} ${avgRating}/5)</h3>
+                            ${reviews.map(r => `
+                                <div class="mb-3 pb-3" style="border-bottom:1px solid var(--border)">
+                                    <div class="flex-between mb-1">
+                                        <span class="font-bold">${r.reviewer_name}</span>
+                                        <span style="color:#f59e0b">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+                                    </div>
+                                    <p class="text-gray text-sm">${r.comment || ''}</p>
+                                    <p class="text-sm text-gray">${formatDate(r.created_at)}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div>
+                        <div class="flex-between mb-3">
+                            <h1 class="text-3xl font-bold">${product.name}</h1>
+                            <span class="badge ${freshness.class}" style="font-size:1rem;">${freshness.text}</span>
+                        </div>
+
+                        <p class="text-lg text-gray mb-4">${product.description}</p>
+
+                        <div class="card mb-4" style="background:var(--light-gray);">
+                            <div class="grid grid-2 gap-3">
+                                <div><p class="text-sm text-gray mb-1">কৃষক</p><p class="font-bold">🧑‍🌾 ${product.farmer_name}</p></div>
+                                <div><p class="text-sm text-gray mb-1">অবস্থান</p><p class="font-bold">📍 ${product.location}</p></div>
+                                <div><p class="text-sm text-gray mb-1">ক্যাটাগরি</p><p class="font-bold">${product.category}</p></div>
+                                <div><p class="text-sm text-gray mb-1">সংগ্রহের তারিখ</p><p class="font-bold">${formatDate(product.harvest_date)}</p></div>
+                                <div><p class="text-sm text-gray mb-1">ফসলের বয়স</p><p class="font-bold">${product.days_old} দিন</p></div>
+                                <div><p class="text-sm text-gray mb-1">মজুদ</p><p class="font-bold">${product.stock} ${product.unit}</p></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            ${hasDiscount ? `
+                                <div class="mb-2">
+                                    <span class="text-gray text-lg" style="text-decoration:line-through;">৳${product.base_price}/${product.unit}</span>
+                                    <span class="badge badge-danger ml-2">${product.discount}% ছাড়</span>
+                                </div>
+                            ` : ''}
+                            <div class="text-3xl font-bold text-primary">৳${product.current_price}/${product.unit}</div>
+                        </div>
+
+                        ${!product.is_expired ? `
+                            <div class="card mb-4">
+                                <div class="form-group" style="margin-bottom:1rem;">
+                                    <label>পরিমাণ (${product.unit})</label>
+                                    <input type="number" id="quantity" class="form-control" value="1" min="1" max="${product.stock}">
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-primary" onclick="handleAddToCart(${product.id})" style="flex:1;">
+                                        কার্টে যোগ করুন
+                                    </button>
+                                    <button class="btn btn-outline" onclick="window.location.href='cart.html'">
+                                        কার্ট দেখুন
+                                    </button>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="card" style="background:#fee2e2;border-color:var(--danger);">
+                                <p class="text-danger font-bold">এই পণ্যের মেয়াদ শেষ হয়ে গেছে</p>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function handleAddToCart(productId) {
+            const user = getCurrentUser();
+            if (!user) {
+                alert('কার্টে যোগ করতে লগইন করুন');
+                window.location.href = 'login.html';
+                return;
+            }
+            const quantity = parseInt(document.getElementById('quantity').value);
+            if (quantity <= 0) { alert('সঠিক পরিমাণ লিখুন'); return; }
+
+            const result = await addToCart(productId, quantity);
+            if (result.success) {
+                alert('পণ্যটি কার্টে যোগ হয়েছে!');
+                updateNavbar();
+            } else {
+                alert(result.message);
+            }
+        }
+
+        loadProductDetails();
+    </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>আমার অর্ডার - AgroMarket</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <a href="index.html" class="logo">🌾 AgroMarket</a>
+      <nav id="auth-links"></nav>
+    </div>
+  </nav>
+
+<section class="section section-gray">
+    <div class="container">
+      <h1 class="section-title">আমার অর্ডার</h1>
+      <div id="ordersList"></div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 AgroMarket. সর্বস্বত্ব সংরক্ষিত।</p>
+  </footer>
+
+<script src="app.js"></script>
+    <script>
+        async function loadOrders() {
+            const user = checkAuth('consumer');
+            if (!user) return;
+
+            const orders = await getMyOrders();
+            const container = document.getElementById('ordersList');
+
+            if (!orders.length) {
+                container.innerHTML = `
+                    <div class="card text-center py-5">
+                        <h3 class="text-2xl text-gray mb-3">কোন অর্ডার নেই</h3>
+                        <a href="products.html" class="btn btn-primary">কেনাকাটা শুরু করুন</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = orders.map(order => {
+                const status = getStatusBadge(order.status);
+                return `
+                    <div class="card mb-3">
+                        <div class="flex-between mb-3">
+                            <div>
+                                <div class="font-bold text-lg">অর্ডার #${order.id}</div>
+                                <div class="text-sm text-gray">${formatDate(order.created_at)}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <span class="badge ${status.class}">${status.text}</span>
+                                <div class="font-bold text-xl text-primary mt-1">৳${order.total}</div>
+                            </div>
+                        </div>
+                        <div>
+                            ${order.items.map(item => `
+                                <div class="flex-between text-sm py-2" style="border-top:1px solid var(--border);">
+                                    <span>${item.product_name}</span>
+                                    <span class="text-gray">${item.quantity} × ৳${item.price} = ৳${item.total}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="mt-3 text-sm text-gray">
+                            <span>📍 ${order.shipping_address}</span> | 
+                            <span>💳 ${order.payment_method === 'cash' ? 'ক্যাশ অন ডেলিভারি' : order.payment_method}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        loadOrders();
+    </script>
+</body>
+</html>
