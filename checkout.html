@@ -147,7 +147,7 @@
       if (!confirmed) {
         btn.textContent = 'অর্ডার নিশ্চিত করুন';
 
-        btn.disabled = false; 
+        btn.disabled = false;
         return;
       }
 
@@ -173,12 +173,14 @@
 
     loadCheckout();
     document.getElementById('paymentMethod').addEventListener('change', function () {
-      const instructions = { bkash: 'বিকাশ নম্বর: 01XXXXXXXXX (Send Money)', nagad: 'নগদ নম্বর: 01XXXXXXXXX (Send Money)', rocket: 'রকেট নম্বর: 01XXXXXXXXX (Send Money)', cash: 'ডেলিভারির সময় পেমেন্ট করুন' }; let box = document.getElementById('paymentInfo');
+      const instructions = { bkash: 'বিকাশ নম্বর: 01XXXXXXXXX (Send Money)', nagad: 'নগদ নম্বর: 01XXXXXXXXX (Send Money)', rocket: 'রকেট নম্বর: 01XXXXXXXXX (Send Money)', cash: 'ডেলিভারির সময় পেমেন্ট করুন' };
+      let box = document.getElementById('paymentInfo');
       if (!box) {
         box = document.createElement('p'); box.id = 'paymentInfo';
         box.style.cssText = 'margin-top:8px;padding:8px;background:#e8f5e9;border-radius:6px;font-size:14px;color:#2e7d32;';
         this.parentNode.appendChild(box);
-      } box.textContent = instructions[this.value] || '';
+      }
+      box.textContent = instructions[this.value] || '';
     });
   </script>
 </body>

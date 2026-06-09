@@ -37,6 +37,21 @@ function createOrder() {
         sendError('ডেলিভারি তথ্য সম্পূর্ণ করুন');
     }
 
+    // Frontend validation can be bypassed, so backend check is necessary
+if (!preg_match('/^01[0-9]\d{8}$/', $phone)) {
+    sendError('সঠিক বাংলাদেশি ফোন নম্বর দিন (যেমন: 01XXXXXXXXX)');
+}
+
+// Prevents users from sending extremely long text to the server
+if (strlen($notes) > 500) {
+    sendError('বিশেষ নির্দেশনা ৫০০ অক্ষরের বেশি হতে পারবে না');
+}
+
+
+if (strlen($shippingAddress) < 10) {
+    sendError('সম্পূর্ণ ঠিকানা লিখুন (কমপক্ষে ১০ অক্ষর)');
+}
+
     $pdo = getDB();
 
     // Get cart
