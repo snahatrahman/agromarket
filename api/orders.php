@@ -47,6 +47,7 @@ if (strlen($notes) > 500) {
     sendError('বিশেষ নির্দেশনা ৫০০ অক্ষরের বেশি হতে পারবে না');
 }
 
+
 if (strlen($shippingAddress) < 10) {
     sendError('সম্পূর্ণ ঠিকানা লিখুন (কমপক্ষে ১০ অক্ষর)');
 }
