@@ -93,6 +93,8 @@
 
   <script src="app.js"></script>
   <script>
+  
+    
     async function loadCheckout() {
       const user = getCurrentUser();
       if (!user) { window.location.href = 'login.html'; return; }
@@ -105,7 +107,8 @@
       }
 
       document.getElementById('name').value = user.name || '';
-      document.getElementById('phone').value = user.phone || '';
+      //document.getElementById('phone').value = user.phone || '';
+      document.getElementById('phone').value =cleanPhoneNumber(user.phone);
       document.getElementById('address').value = user.address || '';
 
       displayOrderSummary(cartData.items, cartData.grand_total);
@@ -133,13 +136,27 @@
 
 
 
-      const phone = document.getElementById('phone').value;
-      if (!/^01[3-9]\d{8}$/.test(phone)) {
-        alert('সঠিক বাংলাদেশি ফোন নম্বর দিন (যেমন: 01XXXXXXXXX)');
-        btn.textContent = 'অর্ডার নিশ্চিত করুন';
-        btn.disabled = false;
-        return;
-      }
+     // MASFICA: Validate phone before placing order
+     
+
+      let phone = document.getElementById('phone').value;
+
+
+phone = phone.replace(/[^0-9]/g, '');
+
+// convert +880 → 0
+if (phone.startsWith('880')) {
+  phone = '0' + phone.slice(3);
+}
+if (!/^01[3-9][0-9]{8}$/.test(phone)) {
+  alert('সঠিক বাংলাদেশি মোবাইল নম্বর দিন (01XXXXXXXXX)');
+  btn.textContent = 'অর্ডার নিশ্চিত করুন';
+  btn.disabled = false;
+  return;
+}
+      
+
+
 
       btn.textContent = '⏳ অপেক্ষা করুন...';
 
@@ -182,6 +199,7 @@
       }
       box.textContent = instructions[this.value] || '';
     });
+    
   </script>
 </body>
 
