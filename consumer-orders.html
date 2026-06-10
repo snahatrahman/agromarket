@@ -57,9 +57,10 @@
                         <div class="flex-between mb-3">
                             <div>
                                 <div class="font-bold text-lg">📋অর্ডার #${order.id}</div>
-                                <div class="text-sm text-gray mt-1">📅 ${formatDate(order.created_at)}</div>
+                                <div class="text-sm text-gray mt-1">📆${formatDate(order.created_at)}</div>
                             </div>
                             <div style="text-align:right;">
+
                                 <span class="badge ${status.class}">${status.text}</span>
                                 <div class="font-bold text-xl text-primary mt-1">৳${order.total}</div>
                             </div>
@@ -73,8 +74,18 @@
                             `).join('')}
                         </div>
                         <div class="mt-3 text-sm text-gray">
-                            <span>📍 ${order.shipping_address}</span> | 
-                            <span>💳 ${order.payment_method === 'cash' ? 'ক্যাশ অন ডেলিভারি' : order.payment_method}</span>
+                            
+                            <span class="meta-tag">${
+  order.payment_method === 'cash'
+    ? '💵 ক্যাশ অন ডেলিভারি'
+    : order.payment_method === 'bkash'
+    ? '<img src="images/bkash.png" alt="bKash" style="width:16px;height:16px;vertical-align:middle;"> বিকাশ'
+    : order.payment_method === 'rocket'
+    ? '<img src="images/rocket.png" alt="Rocket" style="width:16px;height:16px;vertical-align:middle;"> রকেট'
+    : order.payment_method === 'nagad'
+    ? '<img src="images/nagad.png" alt="Nagad" style="width:16px;height:16px;vertical-align:middle;"> নগদ'
+    : '💳 ' + order.payment_method
+}</span>
                         </div>
                     </div>
                 `;
