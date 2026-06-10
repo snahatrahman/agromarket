@@ -20,7 +20,7 @@
     <section class="section section-gray">
         <div class="container">
             <h1 class="section-title">আমার অর্ডার</h1>
-             <p class="orders-subtitle" id="ordersCount"></p>
+            <p class="orders-subtitle" id="ordersCount"></p>
             <div id="ordersList"></div>
         </div>
     </section>
@@ -38,7 +38,7 @@
 
             const orders = await getMyOrders();
             const container = document.getElementById('ordersList');
-            document.getElementById('ordersCount').textContent = `মোট ${orders.length}টি অর্ডার পাওয়া গেছে`;
+            document.getElementById('ordersCount').textContent = `মোট ${orders.length}টি  টি পণ্য অর্ডার করেছেন `;
 
             if (!orders.length) {
                 container.innerHTML = `
