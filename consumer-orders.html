@@ -1,31 +1,36 @@
+-- Active: 1780686387125@@127.0.0.1@3306@agromarketbd
 <!DOCTYPE html>
 <html lang="bn">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>আমার অর্ডার - AgroMarket</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>আমার অর্ডার - AgroMarket</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <nav class="navbar">
-    <div class="container">
-      <a href="index.html" class="logo">🌾 AgroMarket</a>
-      <nav id="auth-links"></nav>
-    </div>
-  </nav>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="logo">🌾 AgroMarket</a>
+            <nav id="auth-links"></nav>
+        </div>
+    </nav>
 
-<section class="section section-gray">
-    <div class="container">
-      <h1 class="section-title">আমার অর্ডার</h1>
-      <div id="ordersList"></div>
-    </div>
-  </section>
+    <section class="section section-gray">
+        <div class="container">
+            <h1 class="section-title">আমার অর্ডার</h1>
+             <p class="orders-subtitle" id="ordersCount"></p>
+            <div id="ordersList"></div>
+        </div>
+    </section>
 
-  <footer>
-    <p>&copy; 2026 AgroMarket. সর্বস্বত্ব সংরক্ষিত।</p>
-  </footer>
+    <footer>
+        <p>&copy; 2026 AgroMarket. সর্বস্বত্ব সংরক্ষিত।</p>
+        <p class="footer-tagline">কৃষক ও ক্রেতার মেলবন্ধন 🌾</p>
+    </footer>
 
-<script src="app.js"></script>
+    <script src="app.js"></script>
     <script>
         async function loadOrders() {
             const user = checkAuth('consumer');
@@ -33,6 +38,7 @@
 
             const orders = await getMyOrders();
             const container = document.getElementById('ordersList');
+            document.getElementById('ordersCount').textContent = `মোট ${orders.length}টি অর্ডার পাওয়া গেছে`;
 
             if (!orders.length) {
                 container.innerHTML = `
@@ -50,8 +56,8 @@
                     <div class="card mb-3">
                         <div class="flex-between mb-3">
                             <div>
-                                <div class="font-bold text-lg">অর্ডার #${order.id}</div>
-                                <div class="text-sm text-gray">${formatDate(order.created_at)}</div>
+                                <div class="font-bold text-lg">📋অর্ডার #${order.id}</div>
+                                <div class="text-sm text-gray mt-1">📅 ${formatDate(order.created_at)}</div>
                             </div>
                             <div style="text-align:right;">
                                 <span class="badge ${status.class}">${status.text}</span>
@@ -78,4 +84,5 @@
         loadOrders();
     </script>
 </body>
+
 </html>
