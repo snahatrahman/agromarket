@@ -42,13 +42,38 @@
 
             <div class="form-group">
               <label>পেমেন্ট মাধ্যম *</label>
-              <select id="paymentMethod" class="form-control" required>
-                <option value="">নির্বাচন করুন</option>
-                <option value="cash">ক্যাশ অন ডেলিভারি</option>
-                <option value="bkash">বিকাশ</option>
-                <option value="nagad">নগদ</option>
-                <option value="rocket">রকেট</option>
-              </select>
+              <div class="payment-options">
+  <label class="payment-option">
+    <input type="radio" name="paymentMethod" value="cash" required>
+    <span class="payment-label">💵 ক্যাশ অন ডেলিভারি</span>
+  </label>
+  <label class="payment-option">
+    <input type="radio" name="paymentMethod" value="bkash">
+    <span class="payment-label">
+      <img src="images/bkash.png" style="width:18px;height:18px;vertical-align:middle;border-radius:3px;"> বিকাশ
+    </span>
+  </label>
+  <label class="payment-option">
+    <input type="radio" name="paymentMethod" value="nagad">
+    <span class="payment-label">
+      <img src="images/Nagad.png" style="width:18px;height:18px;vertical-align:middle;border-radius:3px;"> নগদ
+    </span>
+  </label>
+  <label class="payment-option">
+    <input type="radio" name="paymentMethod" value="rocket">
+    <span class="payment-label">
+      <img src="images/rocket.png" style="width:18px;height:18px;vertical-align:middle;border-radius:3px;"> রকেট
+    </span>
+  </label>
+</div>
+<input type="hidden" id="paymentMethod" name="paymentMethod">
+
+   <div id="mobilePaymentBox" style="display:none;" class="mobile-payment-box mt-3">
+              <label>পেমেন্ট নম্বর *</label>
+              <input type="tel" id="mobilePaymentNumber" class="form-control mt-1" placeholder="01XXXXXXXXX">
+              <p id="mobilePaymentHint" class="text-sm mt-1"></p>
+
+             </div>
             </div>
 
             <div class="form-group">
@@ -136,7 +161,7 @@
 
 
 
-     // MASFICA: Validate phone before placing order
+     //  Validate phone before placing order
      
 
       let phone = document.getElementById('phone').value;
@@ -171,16 +196,56 @@ if (!/^01[3-9][0-9]{8}$/.test(phone)) {
       const orderData = {
         shipping_address: document.getElementById('address').value,
         phone: document.getElementById('phone').value,
-        payment_method: document.getElementById('paymentMethod').value,
+        //payment_method: document.getElementById('paymentMethod').value,
+        payment_method: document.querySelector('input[name="paymentMethod"]:checked')?.value || '',
         notes: document.getElementById('notes').value
       };
 
       const result = await createOrder(orderData);
 
-      if (result.success) {
-        alert(`আপনার অর্ডার সফলভাবে সম্পন্ন হয়েছে!\nঅর্ডার নম্বর: #${result.data.order_id}`);
-        updateNavbar();
-        window.location.href = 'consumer-orders.html';
+      
+
+
+    if (result.success) {
+        const method = orderData.payment_method;
+        const mobileNum = document.getElementById('mobilePaymentNumber').value;
+        const methodIcons = {
+          cash:   '💵',
+          bkash:  '<img src="images/bkash.png" style="width:50px;vertical-align:middle;">',
+          nagad:  '<img src="images/Nagad.png" style="width:50px;vertical-align:middle;">',
+          rocket: '<img src="images/rocket.png" style="width:50px;vertical-align:middle;">'
+        };
+        const methodNames = {
+          cash: 'ক্যাশ অন ডেলিভারি', bkash: 'বিকাশ', nagad: 'নগদ', rocket: 'রকেট'
+        };
+
+        // Show success popup
+        const popup = document.createElement('div');
+        popup.style.cssText = `
+          position:fixed; top:0; left:0; width:100%; height:100%;
+          background:rgba(0,0,0,0.5); z-index:9999;
+          display:flex; align-items:center; justify-content:center;
+        `;
+        popup.innerHTML = `
+          
+          <div style="background:white; border-radius:16px; padding:2rem; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <div style="font-size:3rem; margin-bottom:1rem;">✅</div>
+            <h2 style="color:#16a34a; font-size:1.5rem; margin-bottom:0.5rem;">অর্ডার সম্পন্ন!</h2>
+            <p style="color:#6b7280; margin-bottom:1.5rem;">আপনার অর্ডার সফলভাবে গৃহীত হয়েছে</p>
+            <div style="background:#f0fdf4; border-radius:10px; padding:1rem; margin-bottom:1rem; text-align:left;">
+              <div style="margin-bottom:0.5rem;"><strong>অর্ডার নম্বর:</strong> #${result.data.order_id}</div>
+              <div style="margin-bottom:0.5rem;"><strong>পেমেন্ট:</strong> ${methodIcons[method]} ${methodNames[method]}</div>
+              ${method !== 'cash' && mobileNum ? `<div><strong>পেমেন্ট নম্বর:</strong> ${mobileNum}</div>` : ''}
+            </div>
+            <p style="font-size:0.875rem; color:#6b7280; margin-bottom:1.5rem;">ডেলিভারি সময়: ২-৩ কর্মদিবস 🚚</p>
+            <button onclick="updateNavbar(); window.location.href='consumer-orders.html';" 
+              style="background:#16a34a; color:white; border:none; padding:0.75rem 2rem; border-radius:10px; font-size:1rem; font-weight:600; cursor:pointer; width:100%;">
+              আমার অর্ডার দেখুন →
+            </button>
+          </div>
+
+        `;
+        document.body.appendChild(popup);
       } else {
         alert(result.message);
         btn.textContent = 'অর্ডার নিশ্চিত করুন';
@@ -188,19 +253,33 @@ if (!/^01[3-9][0-9]{8}$/.test(phone)) {
       }
     });
 
+  
+
     loadCheckout();
-    document.getElementById('paymentMethod').addEventListener('change', function () {
-      const instructions = { bkash: 'বিকাশ নম্বর: 01XXXXXXXXX (Send Money)', nagad: 'নগদ নম্বর: 01XXXXXXXXX (Send Money)', rocket: 'রকেট নম্বর: 01XXXXXXXXX (Send Money)', cash: 'ডেলিভারির সময় পেমেন্ট করুন' };
-      let box = document.getElementById('paymentInfo');
-      if (!box) {
-        box = document.createElement('p'); box.id = 'paymentInfo';
-        box.style.cssText = 'margin-top:8px;padding:8px;background:#e8f5e9;border-radius:6px;font-size:14px;color:#2e7d32;';
-        this.parentNode.appendChild(box);
-      }
-      box.textContent = instructions[this.value] || '';
-    });
     
-  </script>
+    
+
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => radio.addEventListener('change', function () {
+      const box = document.getElementById('mobilePaymentBox');
+      const hint = document.getElementById('mobilePaymentHint');
+      const hints = {
+        bkash:  '<img src="images/bkash.png" style="width:50px;vertical-align:middle;"> বিকাশ নম্বরে Send Money করুন',
+        nagad:  '<img src="images/Nagad.png" style="width:50px;vertical-align:middle;"> নগদ নম্বরে Send Money করুন',
+        rocket: '<img src="images/rocket.png" style="width:50px;vertical-align:middle;"> রকেট নম্বরে Send Money করুন',
+        cash:   ''
+      };
+      if (this.value === 'cash') {
+        box.style.display = 'none';
+        document.getElementById('mobilePaymentNumber').value = '';
+      } else {
+        box.style.display = 'block';
+        hint.innerHTML = hints[this.value] || '';
+        hint.style.color = 'var(--primary-dark)';
+        hint.style.marginTop = '6px';
+      }
+    }));
+
+    </script>
 </body>
 
 </html>
