@@ -42,13 +42,31 @@
 
             <div class="form-group">
               <label>পেমেন্ট মাধ্যম *</label>
-              <select id="paymentMethod" class="form-control" required>
-                <option value="">নির্বাচন করুন</option>
-                <option value="cash">ক্যাশ অন ডেলিভারি</option>
-                <option value="bkash">বিকাশ</option>
-                <option value="nagad">নগদ</option>
-                <option value="rocket">রকেট</option>
-              </select>
+              <div class="payment-options">
+  <label class="payment-option">
+    <input type="radio" name="paymentMethod" value="cash" required>
+    <span class="payment-label">💵 ক্যাশ অন ডেলিভারি</span>
+  </label>
+  <label class="payment-option">
+    <input type="radio" name="paymentMethod" value="bkash">
+    <span class="payment-label">
+      <img src="images/bkash.png" style="width:18px;height:18px;vertical-align:middle;border-radius:3px;"> বিকাশ
+    </span>
+  </label>
+  <label class="payment-option">
+    <input type="radio" name="paymentMethod" value="nagad">
+    <span class="payment-label">
+      <img src="images/Nagad.png" style="width:18px;height:18px;vertical-align:middle;border-radius:3px;"> নগদ
+    </span>
+  </label>
+  <label class="payment-option">
+    <input type="radio" name="paymentMethod" value="rocket">
+    <span class="payment-label">
+      <img src="images/rocket.png" style="width:18px;height:18px;vertical-align:middle;border-radius:3px;"> রকেট
+    </span>
+  </label>
+</div>
+<input type="hidden" id="paymentMethod" name="paymentMethod">
             </div>
 
             <div class="form-group">
@@ -171,7 +189,8 @@ if (!/^01[3-9][0-9]{8}$/.test(phone)) {
       const orderData = {
         shipping_address: document.getElementById('address').value,
         phone: document.getElementById('phone').value,
-        payment_method: document.getElementById('paymentMethod').value,
+        //payment_method: document.getElementById('paymentMethod').value,
+        payment_method: document.querySelector('input[name="paymentMethod"]:checked')?.value || '',
         notes: document.getElementById('notes').value
       };
 
