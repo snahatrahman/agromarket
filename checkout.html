@@ -203,16 +203,7 @@ if (!/^01[3-9][0-9]{8}$/.test(phone)) {
 
       const result = await createOrder(orderData);
 
-      /*if (result.success) {
-        alert(`আপনার অর্ডার সফলভাবে সম্পন্ন হয়েছে!\nঅর্ডার নম্বর: #${result.data.order_id}`);
-        updateNavbar();
-        window.location.href = 'consumer-orders.html';
-      } else {
-        alert(result.message);
-        btn.textContent = 'অর্ডার নিশ্চিত করুন';
-        btn.disabled = false;
-      }
-    });*/
+      
 
 
     if (result.success) {
@@ -236,6 +227,7 @@ if (!/^01[3-9][0-9]{8}$/.test(phone)) {
           display:flex; align-items:center; justify-content:center;
         `;
         popup.innerHTML = `
+          
           <div style="background:white; border-radius:16px; padding:2rem; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
             <div style="font-size:3rem; margin-bottom:1rem;">✅</div>
             <h2 style="color:#16a34a; font-size:1.5rem; margin-bottom:0.5rem;">অর্ডার সম্পন্ন!</h2>
@@ -251,6 +243,7 @@ if (!/^01[3-9][0-9]{8}$/.test(phone)) {
               আমার অর্ডার দেখুন →
             </button>
           </div>
+
         `;
         document.body.appendChild(popup);
       } else {
