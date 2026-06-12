@@ -38,7 +38,7 @@
 
             const orders = await getMyOrders();
             const container = document.getElementById('ordersList');
-            document.getElementById('ordersCount').textContent = `মোট ${orders.length}টি  টি পণ্য অর্ডার করেছেন `;
+            document.getElementById('ordersCount').textContent = `মোট ${orders.length}টি  পণ্য অর্ডার করেছেন `;
 
             if (!orders.length) {
                 container.innerHTML = `
