@@ -85,7 +85,7 @@ function addProduct() {
     if ($base_price <= 0) sendError('সঠিক দাম দিন');
     if ($stock <= 0) sendError('সঠিক স্টক দিন');
 
-    if (!$image) $image = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400';
+    if (!$image) $image = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500';
 
     $pdo  = getDB();
     $stmt = $pdo->prepare("INSERT INTO products (name, category, base_price, unit, stock, location, description, image, harvest_date, farmer_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
