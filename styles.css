@@ -365,6 +365,13 @@ textarea.form-control { resize: vertical; }
 }
 
 /* ==================== STAT CARDS ==================== */
+/* Order card improvements */
+
+
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.1);
+}
 .stat-card {
   background: var(--white);
   padding: 1.5rem;
@@ -624,4 +631,45 @@ main, .main-content {
 
 @media (max-width: 640px) {
   .category-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+/* Payment options */
+.payment-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--white);
+}
+
+.payment-option:hover {
+  border-color: var(--primary);
+  background: #f0fdf4;
+}
+
+.payment-option input[type="radio"] {
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+}
+
+.payment-option input[type="radio"]:checked + .payment-label {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.payment-option:has(input:checked) {
+  border-color: var(--primary);
+  background: #f0fdf4;
 }
